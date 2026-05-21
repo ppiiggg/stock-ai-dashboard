@@ -1,0 +1,339 @@
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+    background: #1a1a2e;
+    color: #e0e0e0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 40px 16px;
+}
+
+.container {
+    width: 100%;
+    max-width: 640px;
+}
+
+/* ===== 顶部导航栏 ===== */
+header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 2px;
+}
+
+/* ===== 搜索区 ===== */
+.search-box {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.search-box input {
+    flex: 1;
+    padding: 14px 18px;
+    border: 2px solid #2a2a4a;
+    border-radius: 8px;
+    background: #16213e;
+    color: #fff;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.search-box input:focus {
+    border-color: #4a7cff;
+}
+
+.search-box input::placeholder {
+    color: #666;
+}
+
+.search-box button {
+    padding: 14px 28px;
+    border: none;
+    border-radius: 8px;
+    background: #4a7cff;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, opacity 0.2s;
+    white-space: nowrap;
+    min-width: 88px;
+}
+
+.search-box button:hover {
+    background: #3a6aee;
+}
+
+.search-box button:disabled {
+    background: #555;
+    cursor: not-allowed;
+    opacity: 0.8;
+}
+
+/* ===== 卡片通用 ===== */
+.card {
+    background: #16213e;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 16px;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.card-title {
+    font-size: 13px;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 16px;
+    font-weight: 600;
+}
+
+/* ===== K线图 ===== */
+#chartContainer {
+    width: 100%;
+    height: 360px;
+}
+
+/* ===== 行情卡片 ===== */
+.stock-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 12px;
+}
+
+.symbol-large {
+    font-size: 24px;
+    font-weight: 700;
+    color: #fff;
+}
+
+.price-large {
+    font-size: 32px;
+    font-weight: 700;
+    color: #fff;
+}
+
+.stock-details {
+    display: flex;
+    gap: 24px;
+    font-size: 15px;
+    color: #aaa;
+}
+
+/* 涨=红色, 跌=绿色, 零=灰色 */
+.change-up   { color: #f56565; }
+.change-down { color: #48bb78; }
+.change-zero { color: #aaa; }
+
+/* ===== AI 分析卡片 ===== */
+.analysis-tags {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.tag::before {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+/* 情绪标签 — Bullish=橙色, Neutral=灰色, Bearish=蓝色 */
+.tag-bullish { background: rgba(245, 158, 11, 0.18);  color: #f59e0b; }
+.tag-bullish::before { background: #f59e0b; }
+
+.tag-neutral { background: rgba(156, 163, 175, 0.18); color: #9ca3af; }
+.tag-neutral::before { background: #9ca3af; }
+
+.tag-bearish { background: rgba(59, 130, 246, 0.18);  color: #3b82f6; }
+.tag-bearish::before { background: #3b82f6; }
+
+/* 风险等级标签 */
+.tag-risk-low  { background: rgba(72, 187, 120, 0.18); color: #48bb78; }
+.tag-risk-low::before  { background: #48bb78; }
+
+.tag-risk-mid  { background: rgba(245, 158, 11, 0.18); color: #f59e0b; }
+.tag-risk-mid::before  { background: #f59e0b; }
+
+.tag-risk-high { background: rgba(245, 101, 101, 0.18); color: #f56565; }
+.tag-risk-high::before { background: #f56565; }
+
+.summary-text {
+    font-size: 15px;
+    line-height: 1.75;
+    color: #c0c0c0;
+}
+
+/* ===== 历史记录 ===== */
+.empty-hint {
+    color: #888;
+}
+
+#historyList {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.history-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 14px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+    font-size: 14px;
+    gap: 12px;
+}
+
+.history-symbol {
+    font-weight: 600;
+    color: #fff;
+    min-width: 60px;
+}
+
+.history-sentiment {
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* ===== Loading 旋转动画 ===== */
+.loading-spinner {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.25);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    margin-right: 6px;
+    vertical-align: middle;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ===== 调试面板 ===== */
+.debug-btn {
+    background: transparent;
+    border: 1px solid #444;
+    color: #888;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s;
+}
+
+.debug-btn:hover {
+    border-color: #4a7cff;
+    color: #4a7cff;
+}
+
+#debugContent {
+    font-family: 'SF Mono', 'Cascadia Code', 'Consolas', monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    color: #aaa;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+.debug-section {
+    margin-bottom: 14px;
+    padding: 10px 12px;
+    background: rgba(0,0,0,0.25);
+    border-radius: 8px;
+    border-left: 3px solid #555;
+}
+
+.debug-section.success { border-left-color: #48bb78; }
+.debug-section.error   { border-left-color: #f56565; }
+
+.debug-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+}
+
+.debug-json {
+    color: #e0e0e0;
+}
+
+/* ===== 响应式 ===== */
+@media (max-width: 480px) {
+    body {
+        padding: 20px 12px;
+    }
+
+    header h1 {
+        font-size: 22px;
+    }
+
+    .search-box {
+        flex-direction: column;
+    }
+
+    .search-box button {
+        width: 100%;
+        padding: 14px;
+    }
+
+    .price-large {
+        font-size: 26px;
+    }
+
+    .symbol-large {
+        font-size: 20px;
+    }
+
+    .stock-main {
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .stock-details {
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .history-item {
+        flex-wrap: wrap;
+    }
+}

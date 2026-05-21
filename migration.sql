@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS public.analyses (
     symbol TEXT NOT NULL,
     price NUMERIC NOT NULL,
     change_percent TEXT NOT NULL,
+    market TEXT,
     summary TEXT NOT NULL,
     sentiment TEXT NOT NULL,
     risk_level TEXT NOT NULL,

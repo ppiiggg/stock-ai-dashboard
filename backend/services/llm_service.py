@@ -3,10 +3,19 @@ import re
 from openai import AsyncOpenAI
 from backend.config import DEEPSEEK_API_KEY
 
-client = AsyncOpenAI(
-    api_key=DEEPSEEK_API_KEY,
-    base_url="https://api.deepseek.com",
-)
+_client: AsyncOpenAI | None = None
+
+
+def _get_client() -> AsyncOpenAI:
+    global _client
+    if _client is None:
+        if not DEEPSEEK_API_KEY:
+            raise RuntimeError("DEEPSEEK_API_KEY environment variable is not set")
+        _client = AsyncOpenAI(
+            api_key=DEEPSEEK_API_KEY,
+            base_url="https://api.deepseek.com",
+        )
+    return _client
 
 SYSTEM_PROMPT = '''你是一个专业的股票分析师。用户会提供股票的实时行情数据（价格、涨跌幅、成交量），可能还会附带 K 线历史数据的技术指标摘要。
 
@@ -109,7 +118,7 @@ async def analyze_stock(stock_data: dict, retry: int = 0) -> dict:
     user_message = "\n".join(parts)
 
     try:
-        response = await client.chat.completions.create(
+        response = await _get_client().chat.completions.create(
             model="deepseek-chat",
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT},

@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI股票分析面板 - 教学文档</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: #1a1a2e;
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 40px 16px;
+            line-height: 1.7;
+        }
+
+        .container { max-width: 1000px; margin: 0 auto; }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 24px;
+            border-bottom: 2px solid #2a2a4a;
+        }
+        header h1 { font-size: 32px; font-weight: 700; color: #fff; letter-spacing: 2px; margin-bottom: 8px; }
+        header p { color: #888; font-size: 14px; }
+
+        /* Table of Contents */
+        .toc {
+            background: #16213e;
+            border-radius: 12px;
+            padding: 28px;
+            margin-bottom: 24px;
+        }
+        .toc h2 { font-size: 18px; color: #fff; margin-bottom: 16px; }
+        .toc ol { padding-left: 24px; color: #aaa; font-size: 14px; line-height: 2; }
+        .toc a { color: #4a7cff; text-decoration: none; }
+        .toc a:hover { text-decoration: underline; }
+
+        .card {
+            background: #16213e;
+            border-radius: 12px;
+            padding: 28px;
+            margin-bottom: 20px;
+        }
+        .card h2 {
+            font-size: 22px; color: #fff; margin-bottom: 20px;
+            padding-bottom: 10px; border-bottom: 1px solid #2a2a4a;
+        }
+        .card h3 {
+            font-size: 17px; color: #4a7cff; margin: 28px 0 10px;
+            padding-left: 10px; border-left: 3px solid #4a7cff;
+        }
+        .card h4 {
+            font-size: 15px; color: #ccc; margin: 20px 0 6px;
+        }
+
+        p, li { color: #c0c0c0; font-size: 14px; line-height: 1.8; }
+
+        pre {
+            background: #0d1117;
+            border-radius: 8px;
+            padding: 18px 20px;
+            overflow-x: auto;
+            font-family: 'SF Mono', 'Cascadia Code', 'Consolas', 'Fira Code', monospace;
+            font-size: 13px;
+            line-height: 1.7;
+            color: #c9d1d9;
+            border: 1px solid #2a2a4a;
+            margin: 12px 0;
+        }
+
+        .kw { color: #ff7b72; }
+        .str { color: #a5d6ff; }
+        .cm { color: #8b949e; }
+        .fn { color: #d2a8ff; }
+        .num { color: #79c0ff; }
+        .ty { color: #ffa657; }
+
+        .info-box {
+            background: rgba(74, 124, 255, 0.08);
+            border: 1px solid rgba(74, 124, 255, 0.25);
+            border-radius: 8px;
+            padding: 14px 18px;
+            margin: 14px 0;
+            font-size: 13px;
+            color: #b0c4ff;
+        }
+        .warn-box {
+            background: rgba(245, 158, 11, 0.08);
+            border: 1px solid rgba(245, 158, 11, 0.25);
+            border-radius: 8px;
+            padding: 14px 18px;
+            margin: 14px 0;
+            font-size: 13px;
+            color: #f0c060;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12px 0;
+        }
+        th, td {
+            padding: 10px 14px;
+            text-align: left;
+            border-bottom: 1px solid #2a2a4a;
+            font-size: 13px;
+        }
+        th { color: #888; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; width: 180px; }
+        td { color: #e0e0e0; }
+
+        .flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            padding: 16px 0;
+        }
+        .flow-box {
+            background: #0d1117;
+            border: 1px solid #2a2a4a;
+            border-radius: 8px;
+            padding: 10px 16px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: #ccc;
+        }
+        .flow-arrow { color: #4a7cff; font-size: 16px; font-weight: 700; }
+
+        .file-path {
+            display: inline-block;
+            background: #0d1117;
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 2px 8px;
+            font-family: 'SF Mono', 'Consolas', monospace;
+            font-size: 12px;
+            color: #4a7cff;
+            margin: 2px 0;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+            font-size: 12px;
+        }
+
+        @media (max-width: 640px) {
+            header h1 { font-size: 22px; }
+            pre { font-size: 11px; padding: 12px; }
+            .flow { flex-direction: column; }
+            .flow-arrow { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+
+        <header>
+            <h1>AI 股票分析面板 — 教学文档</h1>
+            <p>全栈项目实现原理 &middot; 逐文件源码分析 &middot; 2026-05-21</p>
+        </header>
+
+        <!-- ====== 目录 ====== -->
+        <div class="toc">
+            <h2>目录</h2>
+            <ol>
+                <li><a href="#s1">项目概览：它是如何工作的？</a></li>
+                <li><a href="#s2">整体架构与数据流</a></li>
+                <li><a href="#s3">后端源码逐文件分析</a>
+                    <ol>
+                        <li><a href="#s3-1">main.py — FastAPI 入口 &amp; CORS &amp; 静态文件托管</a></li>
+                        <li><a href="#s3-2">config.py — 环境变量加载</a></li>
+                        <li><a href="#s3-3">models/schemas.py — Pydantic 数据模型</a></li>
+                        <li><a href="#s3-4">routers/stock.py — 股票行情接口</a></li>
+                        <li><a href="#s3-5">routers/candles.py — K线数据接口</a></li>
+                        <li><a href="#s3-6">routers/analysis.py — AI 分析 + 历史记录接口</a></li>
+                        <li><a href="#s3-7">services/stock_service.py — 美股多级降级 + A股分流</a></li>
+                        <li><a href="#s3-8">services/twelve_data_service.py — Twelve Data 接入层</a></li>
+                        <li><a href="#s3-9">services/china_stock_service.py — 新浪财经A股接入</a></li>
+                        <li><a href="#s3-10">services/candle_service.py — K线多数据源</a></li>
+                        <li><a href="#s3-11">services/llm_service.py — DeepSeek AI 分析核心</a></li>
+                        <li><a href="#s3-12">services/supabase_service.py — 数据库存取</a></li>
+                        <li><a href="#s3-13">services/cache.py — TTL 缓存 &amp; 节流器</a></li>
+                    </ol>
+                </li>
+                <li><a href="#s4">前端源码逐文件分析</a>
+                    <ol>
+                        <li><a href="#s4-1">index.html — 页面结构</a></li>
+                        <li><a href="#s4-2">style.css — 深色主题 UI</a></li>
+                        <li><a href="#s4-3">app.js — 前端核心逻辑</a></li>
+                    </ol>
+                </li>
+                <li><a href="#s5">部署配置 — render.yaml</a></li>
+                <li><a href="#s6">核心设计模式总结</a></li>
+            </ol>
+        </div>
+
+        <!-- ====== S1: 项目概览 ====== -->
+        <div class="card" id="s1">
+            <h2>1. 项目概览：它是如何工作的？</h2>
+
+            <p>这是一个<strong>全栈 AI 股票分析面板</strong>。用户在前端输入股票代码，后端自动获取实时行情和 K 线数据，然后调用 DeepSeek 大模型对股票进行专业分析，最后将分析结果存入 Supabase 数据库。</p>
+
+            <p><strong>核心工作流程（从用户点击到页面展示）：</strong></p>
+
+            <div class="flow">
+                <div class="flow-box">1. 用户输入<br>股票代码</div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-box">2. 前端调用<br>/api/stock/:symbol</div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-box">3. 后端多级<br>数据源查询</div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-box">4. 返回行情<br>展示卡片</div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-box">5. 调用<br>/api/analyze</div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-box">6. DeepSeek<br>LLM 分析</div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-box">7. Supabase<br>存储结果</div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-box">8. 前端展示<br>AI 分析卡片</div>
+            </div>
+
+            <div class="info-box">
+                <strong>关键技术决策：</strong>前后端一体部署（FastAPI 同时提供 API 和静态文件），避免 CORS 问题；多级数据源降级（Twelve Data → yfinance → Finnhub）确保美股数据可用性；LLM 调用采用 4 层容错机制保证前端永远不会崩溃。
+            </div>
+        </div>
+
+        <!-- ====== S2: 架构 ====== -->
+        <div class="card" id="s2">
+            <h2>2. 整体架构与数据流</h2>
+
+            <h3>2.1 架构图</h3>
+            <pre>
+┌──────────────────────────────────────────────────────┐
+│                     Render.com                        │
+│  ┌────────────────────────────────────────────────┐  │
+│  │             FastAPI Application                 │  │
+│  │                                                 │  │
+│  │  ┌──────────────────┐  ┌────────────────────┐  │  │
+│  │  │   API Routers    │  │  StaticFiles Mount  │  │  │
+│  │  │  /api/stock      │  │  / → frontend/      │  │  │
+│  │  │  /api/candles    │  │  index.html         │  │  │
+│  │  │  /api/analyze    │  │  app.js             │  │  │
+│  │  │  /api/history    │  │  style.css          │  │  │
+│  │  └────────┬─────────┘  └────────────────────┘  │  │
+│  │           │                                      │  │
+│  │  ┌────────▼─────────────────────────────────┐   │  │
+│  │  │           Services Layer                  │   │  │
+│  │  │  stock_service  llm_service               │   │  │
+│  │  │  candle_service supabase_service          │   │  │
+│  │  │  china_stock_service  twelve_data_service │   │  │
+│  │  │  cache (TTL + RateLimiter)                │   │  │
+│  │  └────────┬─────────────────────────────────┘   │  │
+│  └───────────┼─────────────────────────────────────┘  │
+└──────────────┼────────────────────────────────────────┘
+               │
+    ┌──────────┼──────────────┬──────────────┐
+    ▼          ▼              ▼              ▼
+┌────────┐ ┌────────┐ ┌──────────┐ ┌──────────┐
+│Twelve  │ │yfinance│ │ 新浪财经  │ │ Finnhub  │
+│  Data  │ │ (美股)  │ │  (A股)   │ │  (备选)  │
+└────────┘ └────────┘ └──────────┘ └──────────┘
+    美股主      美股备1       A股数据       美股备2
+
+┌────────┐ ┌──────────┐
+│DeepSeek│ │ Supabase │
+│  API   │ │(Postgres)│
+└────────┘ └──────────┘
+  AI 分析      数据存储</pre>
+
+            <h3>2.2 股票行情查询的降级策略</h3>
+            <p>美股查询采用<strong>三级降级链</strong>，确保即使某个免费 API 挂了也能获取数据：</p>
+
+            <div class="flow">
+                <div class="flow-box">Twelve Data<br><small>首选</small></div>
+                <span class="flow-arrow">→失败→</span>
+                <div class="flow-box">yfinance<br><small>备选1</small></div>
+                <span class="flow-arrow">→失败→</span>
+                <div class="flow-box">Finnhub<br><small>备选2</small></div>
+                <span class="flow-arrow">→失败→</span>
+                <div class="flow-box">抛异常<br><small>返回404</small></div>
+            </div>
+
+            <div class="warn-box"><strong>注意：</strong>成交量字段在 Twelve Data 免费版中为 0，因此额外通过 yfinance 的 <code>_get_us_volume()</code> 函数补齐——这被称为"字段级多数据源补齐"。</div>
+        </div>
+
+        <!-- ====== S3: 后端 ====== -->
+        <div class="card" id="s3">
+            <h2>3. 后端源码逐文件分析</h2>
+
+            <!-- S3-1 -->
+            <h3 id="s3-1">3.1 <span class="file-path">backend/main.py</span> — FastAPI 入口 &amp; CORS &amp; 静态文件</h3>
+            <p>这是整个应用的<strong>启动入口</strong>，只做三件事：创建 FastAPI 实例、配置 CORS 中间件、挂载路由和静态文件。</p>
+
+            <h4>逐段分析：</h4>
+
+            <pre><span class="cm"># 1. 创建 FastAPI 应用实例</span>
+app = <span class="fn">FastAPI</span>(title=<span class="str">"Stock AI Dashboard"</span>, version=<span class="str">"1.0.0"</span>)
+
+<span class="cm"># 2. CORS 中间件 — 开发阶段允许所有来源跨域访问</span>
+<span class="cm">#    allow_origins=["*"] 表示任何域名的前端都能调这个 API</span>
+<span class="cm">#    Render 部署后前后端同源，CORS 实际不起作用，但保留作为安全兜底</span>
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[<span class="str">"*"</span>],
+    allow_credentials=<span class="kw">True</span>,
+    allow_methods=[<span class="str">"*"</span>],
+    allow_headers=[<span class="str">"*"</span>],
+)
+
+<span class="cm"># 3. 注册路由 — 三个业务路由挂到 /api 前缀下</span>
+<span class="kw">from</span> backend.routers <span class="kw">import</span> stock, analysis, candles
+app.include_router(stock.router, prefix=<span class="str">"/api"</span>)
+app.include_router(analysis.router, prefix=<span class="str">"/api"</span>)
+app.include_router(candles.router, prefix=<span class="str">"/api"</span>)
+
+<span class="cm"># 4. 健康检查接口</span>
+<span class="kw">@app</span>.get(<span class="str">"/api/health"</span>)
+<span class="kw">def</span> <span class="fn">root</span>():
+    <span class="kw">return</span> {<span class="str">"message"</span>: <span class="str">"Stock AI Dashboard API is running"</span>}
+
+<span class="cm"># 5. 静态文件托管 — 把 frontend/ 目录映射到根路径 "/"</span>
+<span class="cm">#    html=True 表示找不到文件时回退到 index.html (SPA 模式)</span>
+<span class="kw">from</span> fastapi.staticfiles <span class="kw">import</span> StaticFiles
+frontend_dir = os.path.join(os.path.dirname(__file__), <span class="str">".."</span>, <span class="str">"frontend"</span>)
+<span class="kw">if</span> os.path.isdir(frontend_dir):
+    app.mount(<span class="str">"/"</span>, <span class="fn">StaticFiles</span>(directory=frontend_dir, html=<span class="kw">True</span>), name=<span class="str">"frontend"</span>)</pre>
+
+            <div class="info-box">
+                <strong>关键点：</strong><code>app.mount("/", StaticFiles(...), ...)</code> 必须放在所有路由注册之后，否则静态文件会拦截所有请求。访问 <code>/</code> 返回 index.html，访问 <code>/interview.html</code> 返回面试文档页面，API 请求由路由优先处理。
+            </div>
+
+            <!-- S3-2 -->
+            <h3 id="s3-2">3.2 <span class="file-path">backend/config.py</span> — 环境变量加载</h3>
+            <p>这个文件只做一件事：<strong>从 .env 文件或系统环境变量中读取配置</strong>。</p>
+
+            <pre><span class="kw">from</span> dotenv <span class="kw">import</span> load_dotenv
+<span class="kw">import</span> os
+
+<span class="fn">load_dotenv</span>()  <span class="cm"># 自动寻找项目根目录的 .env 文件并加载</span>
+
+FINNHUB_API_KEY = os.getenv(<span class="str">"FINNHUB_API_KEY"</span>)
+TWELVE_DATA_API_KEY = os.getenv(<span class="str">"TWELVE_DATA_API_KEY"</span>)
+DEEPSEEK_API_KEY = os.getenv(<span class="str">"DEEPSEEK_API_KEY"</span>)
+SUPABASE_URL = os.getenv(<span class="str">"SUPABASE_URL"</span>)
+SUPABASE_KEY = os.getenv(<span class="str">"SUPABASE_KEY"</span>)</pre>
+
+            <div class="warn-box">
+                <strong>安全注意：</strong>这些 Key 不能硬编码在代码中，也不能提交到 Git。本地开发用 <code>.env</code>（已在 <code>.gitignore</code> 中），生产环境通过 Render 面板设置环境变量（<code>render.yaml</code> 中 <code>sync: false</code> 表示不从代码同步，需在 Render 后台手动填入）。
+            </div>
+
+            <!-- S3-3 -->
+            <h3 id="s3-3">3.3 <span class="file-path">backend/models/schemas.py</span> — Pydantic 数据模型</h3>
+            <p>定义了 API 请求/响应的<strong>数据结构约束</strong>。FastAPI 会根据这些模型自动校验数据、生成 API 文档。</p>
+
+            <pre><span class="kw">class</span> <span class="ty">StockData</span>(BaseModel):
+    <span class="cm">"""POST /api/analyze 的请求体：前端传什么数据给 AI 分析"""</span>
+    symbol: <span class="ty">str</span>                              <span class="cm"># 股票代码，如 "AAPL"</span>
+    price: <span class="ty">float</span>                             <span class="cm"># 当前价格</span>
+    change: <span class="ty">float</span>                            <span class="cm"># 涨跌金额</span>
+    change_percent: <span class="ty">str</span>                       <span class="cm"># 涨跌百分比，如 "+2.35%"</span>
+    volume: <span class="ty">int</span> = 0                        <span class="cm"># 成交量，默认 0</span>
+    market: <span class="ty">Optional</span>[str] = <span class="kw">None</span>           <span class="cm"># "us" 或 "china"，用于前端货币符号</span>
+    candles: <span class="ty">Optional</span>[list] = <span class="kw">None</span>        <span class="cm"># K线数据数组，可选</span>
+
+<span class="kw">class</span> <span class="ty">AIAnalysisResult</span>(BaseModel):
+    <span class="cm">"""POST /api/analyze 的响应体：AI 分析必须返回这三个字段"""</span>
+    summary: <span class="ty">str</span>                                       <span class="cm"># AI 分析总结</span>
+    sentiment: <span class="ty">Literal</span>[<span class="str">"Bullish"</span>, <span class="str">"Neutral"</span>, <span class="str">"Bearish"</span>]  <span class="cm"># 情绪：仅限这三者</span>
+    risk_level: <span class="ty">str</span>                                      <span class="cm"># 风险等级</span></pre>
+
+            <div class="info-box">
+                <strong>为什么用 Literal 类型？</strong>FastAPI 会自动校验 <code>sentiment</code> 字段值必须是 Bullish/Neutral/Bearish 之一，如果 LLM 返回了其他值，API 会在返回给前端之前就报错。配合 llm_service.py 中的 <code>_validate_and_return()</code> 函数做双重保障。
+            </div>
+
+            <!-- S3-4 -->
+            <h3 id="s3-4">3.4 <span class="file-path">backend/routers/stock.py</span> — 股票行情接口</h3>
+            <p><strong>职责：</strong>接收前端发来的股票代码，调用 stock_service 查询行情，返回 JSON。</p>
+
+            <pre><span class="kw">@router</span>.get(<span class="str">"/stock/{symbol}"</span>)            <span class="cm"># GET /api/stock/AAPL</span>
+<span class="kw">async def</span> <span class="fn">get_stock</span>(symbol: <span class="ty">str</span>):       <span class="cm"># {symbol} 自动从 URL 路径提取</span>
+    <span class="kw">try</span>:
+        data = <span class="kw">await</span> <span class="fn">get_stock_quote</span>(symbol)  <span class="cm"># 调用核心服务</span>
+        <span class="kw">return</span> data
+    <span class="kw">except</span> <span class="ty">ValueError</span> <span class="kw">as</span> e:
+        <span class="kw">raise</span> <span class="fn">HTTPException</span>(status_code=<span class="num">404</span>, detail=<span class="fn">str</span>(e))  <span class="cm"># 查不到</span>
+    <span class="kw">except</span> <span class="ty">Exception</span> <span class="kw">as</span> e:
+        <span class="kw">raise</span> <span class="fn">HTTPException</span>(status_code=<span class="num">500</span>, detail=<span class="fn">str</span>(e))  <span class="cm"># 服务端错误</span></pre>
+
+            <div class="info-box">
+                <strong>路由层只做两件事：</strong>(1) 接收 HTTP 请求参数；(2) 把异常转成合适的 HTTP 状态码。业务逻辑全部封装在 services 层，这叫"关注点分离"。
+            </div>
+
+            <!-- S3-5 -->
+            <h3 id="s3-5">3.5 <span class="file-path">backend/routers/candles.py</span> — K线数据接口</h3>
+            <p>获取历史 K 线数据，支持<strong>时间范围</strong>和<strong>K线周期</strong>两个查询参数。</p>
+
+            <pre><span class="kw">@router</span>.get(<span class="str">"/candles/{symbol}"</span>)
+<span class="kw">async def</span> <span class="fn">get_kline</span>(
+    symbol: <span class="ty">str</span>,
+    period: <span class="ty">str</span> = <span class="fn">Query</span>(<span class="str">"3mo"</span>, description=<span class="str">"时间范围"</span>),    <span class="cm"># 默认3个月</span>
+    interval: <span class="ty">str</span> = <span class="fn">Query</span>(<span class="str">"1d"</span>, description=<span class="str">"K线周期"</span>),     <span class="cm"># 默认日线</span>
+):
+    <span class="kw">return await</span> <span class="fn">get_candles</span>(symbol, period=period, interval=interval)</pre>
+
+            <p>前端固定使用 <code>period=3mo&interval=1d</code>（3个月日线），Lightweight Charts 用这些数据绘制 K 线图。</p>
+
+            <!-- S3-6 -->
+            <h3 id="s3-6">3.6 <span class="file-path">backend/routers/analysis.py</span> — AI 分析 + 历史记录</h3>
+            <p><strong>核心接口</strong>：接收前端传来的完整股票数据（含 K 线），调用 LLM 分析后存入 Supabase。</p>
+
+            <pre><span class="kw">@router</span>.post(<span class="str">"/analyze"</span>, response_model=AIAnalysisResult)
+<span class="kw">async def</span> <span class="fn">analyze</span>(request: StockData):          <span class="cm"># FastAPI 自动把 JSON body 转成 StockData 对象</span>
+    <span class="cm"># Step 1: 调用 LLM 分析</span>
+    analysis = <span class="kw">await</span> <span class="fn">analyze_stock</span>(request.model_dump())  <span class="cm"># model_dump() 把 Pydantic 对象转 dict</span>
+
+    <span class="cm"># Step 2: 构造存储记录</span>
+    record = {
+        <span class="str">"symbol"</span>: request.symbol,
+        <span class="str">"price"</span>: request.price,
+        <span class="str">"change_percent"</span>: request.change_percent,
+        <span class="str">"market"</span>: request.market,
+        <span class="str">"summary"</span>: analysis[<span class="str">"summary"</span>],
+        <span class="str">"sentiment"</span>: analysis[<span class="str">"sentiment"</span>],
+        <span class="str">"risk_level"</span>: analysis[<span class="str">"risk_level"</span>],
+        <span class="str">"created_at"</span>: datetime.now(timezone.utc).isoformat(),  <span class="cm"># UTC 时间戳</span>
+    }
+
+    <span class="cm"># Step 3: 写入 Supabase</span>
+    <span class="fn">save_analysis</span>(record)
+
+    <span class="kw">return</span> analysis</pre>
+
+            <p><code>@router.get("/history")</code> 取最近 5 条分析记录（按 created_at 降序），用在前端底部展示区。</p>
+
+            <!-- S3-7 -->
+            <h3 id="s3-7">3.7 <span class="file-path">backend/services/stock_service.py</span> — 美股多级降级 + A股分流</h3>
+            <p>这是行情查询的<strong>调度中心</strong>。入口函数 <code>get_stock_quote()</code> 根据代码特征自动分流，美股走三级降级链。</p>
+
+            <h4>核心入口：</h4>
+            <pre><span class="kw">async def</span> <span class="fn">get_stock_quote</span>(symbol: <span class="ty">str</span>) -> <span class="ty">dict</span>:
+    resolved = symbol.strip().upper()
+
+    <span class="cm"># 判断是否为A股：纯数字6位 → 中国股票</span>
+    <span class="kw">if</span> <span class="fn">is_china_stock</span>(resolved):
+        result = <span class="kw">await</span> <span class="fn">get_china_stock_quote</span>(resolved)
+        result[<span class="str">"market"</span>] = <span class="str">"china"</span>   <span class="cm"># 标记市场，前端据此用 ¥ 符号</span>
+        <span class="kw">return</span> result
+
+    <span class="cm"># 美股三级降级链</span>
+    <span class="cm"># Level 1: Twelve Data</span>
+    td_result = <span class="kw">await</span> <span class="fn">get_twelve_data_quote</span>(resolved)
+    <span class="kw">if</span> td_result <span class="kw">is not None</span> <span class="kw">and</span> td_result.get(<span class="str">"price"</span>, <span class="num">0</span>) > <span class="num">0</span>:
+        td_result[<span class="str">"market"</span>] = <span class="str">"us"</span>
+        <span class="kw">return</span> td_result                     <span class="cm"># ← 注意：Twelve Data 免费版 volume 可能为0</span>
+
+    <span class="cm"># Level 2: yfinance (同步调用，因为 yfinance 库不是 async 的)</span>
+    yf_result = <span class="fn">_get_us_quote_from_yf</span>(resolved)
+    <span class="kw">if</span> yf_result <span class="kw">is not None</span> <span class="kw">and</span> yf_result.get(<span class="str">"price"</span>, <span class="num">0</span>) > <span class="num">0</span>:
+        yf_result[<span class="str">"market"</span>] = <span class="str">"us"</span>
+        <span class="kw">return</span> yf_result                     <span class="cm"># yfinance 含真实成交量</span>
+
+    <span class="cm"># Level 3: Finnhub</span>
+    fh_result = <span class="kw">await</span> <span class="fn">_get_finnhub_quote</span>(resolved)
+    <span class="kw">if</span> fh_result <span class="kw">is not None</span> <span class="kw">and</span> fh_result.get(<span class="str">"price"</span>, <span class="num">0</span>) > <span class="num">0</span>:
+        fh_result[<span class="str">"market"</span>] = <span class="str">"us"</span>
+        <span class="kw">return</span> fh_result
+
+    <span class="cm"># 全部失败</span>
+    <span class="kw">raise</span> <span class="ty">ValueError</span>(<span class="str">f"Cannot get quote for {symbol}, check the ticker"</span>)</pre>
+
+            <h4>成交量补齐机制：</h4>
+            <p>yfinance 路径每次都会调用 <code>_get_us_volume()</code> 获取真实成交量（带缓存+重试+节流）。Finnhub 路径同样调用了这个函数。但 Twelve Data 路径<strong>原来遗漏了</strong>——这就是 Bug 3 "美股成交量为0"的根因。修复方式是在 Twelve Data 返回后也调用 <code>_get_us_volume()</code> 补齐。</p>
+
+            <pre><span class="kw">def</span> <span class="fn">_get_us_volume</span>(symbol: <span class="ty">str</span>) -> <span class="ty">int</span>:
+    <span class="cm"># 1. 先查缓存（5分钟 TTL）</span>
+    cached = yf_cache.get(<span class="str">f"vol:{symbol}"</span>)
+    <span class="kw">if</span> cached <span class="kw">is not None</span>:
+        <span class="kw">return</span> cached
+
+    <span class="cm"># 2. 通过 yfinance 取最近5天数据，拿最后一天的成交量</span>
+    ticker = yf.Ticker(symbol)
+    <span class="kw">for</span> attempt <span class="kw">in</span> <span class="fn">range</span>(<span class="num">3</span>):                   <span class="cm"># 重试3次</span>
+        <span class="kw">try</span>:
+            yf_throttle.acquire()          <span class="cm"># 节流：两次调用间隔 ≥ 3秒</span>
+            hist = ticker.history(period=<span class="str">"5d"</span>)
+            <span class="kw">if not</span> hist.empty:
+                vol = <span class="fn">int</span>(hist[<span class="str">"Volume"</span>].iloc[-<span class="num">1</span>])
+                yf_cache.set(<span class="str">f"vol:{symbol}"</span>, vol)
+                <span class="kw">return</span> vol
+        <span class="kw">except</span> <span class="ty">Exception</span> <span class="kw">as</span> e:
+            <span class="kw">if</span> attempt < <span class="num">2</span>:
+                time.sleep((<span class="num">2</span> ** attempt) * <span class="num">2</span> + random.uniform(<span class="num">0</span>, <span class="num">1</span>))  <span class="cm"># 指数退避</span>
+    <span class="kw">return</span> <span class="num">0</span>  <span class="cm"># 全部失败则返回 0</span></pre>
+
+            <!-- S3-8 -->
+            <h3 id="s3-8">3.8 <span class="file-path">backend/services/twelve_data_service.py</span> — Twelve Data 接入层</h3>
+            <p>封装了 Twelve Data API 的两个端点：<code>/quote</code>（实时行情）和 <code>/time_series</code>（K线历史）。</p>
+
+            <h4>异步速率限制器：</h4>
+            <pre><span class="kw">class</span> <span class="ty">AsyncRateLimiter</span>:
+    <span class="cm">"""滑动窗口限速器：免费版每分钟 8 次请求"""</span>
+    <span class="kw">async def</span> <span class="fn">acquire</span>(<span class="kw">self</span>):
+        <span class="cm"># 1. 清理过期的时间戳（超过60秒的删掉）</span>
+        <span class="cm"># 2. 如果窗口内已有 ≥ 8 个时间戳，sleep 到最早那个过期</span>
+        <span class="cm"># 3. 记录本次请求时间</span></pre>
+
+            <div class="warn-box">
+                <strong>设计要点：</strong>为什么用异步锁（asyncio.Lock）而不是线程锁？因为整个应用是 async 的，多个请求可能同时到达 Twelve Data 的限速边界。用 asyncio.Lock 保证"检查+等待+记录"这个三段操作是原子的。
+            </div>
+
+            <h4>K线数据处理：</h4>
+            <pre><span class="cm"># Twelve Data 返回的 K 线是从新到旧排列的</span>
+<span class="cm"># 前端 Lightweight Charts 需要从旧到新排列</span>
+<span class="kw">for</span> v <span class="kw">in</span> <span class="fn">reversed</span>(values):  <span class="cm"># ← reversed() 翻转顺序</span>
+    candles.append({...})</pre>
+
+            <!-- S3-9 -->
+            <h3 id="s3-9">3.9 <span class="file-path">backend/services/china_stock_service.py</span> — 新浪财经A股接入</h3>
+            <p>从新浪财经的免费接口获取 A 股实时行情。<strong>解析老式 var 赋值格式</strong>是本文件的核心逻辑。</p>
+
+            <h4>新浪数据格式与解析：</h4>
+            <pre><span class="cm"># 新浪返回的原始格式（JS var 赋值语句）：</span>
+<span class="cm"># var hq_str_sh600036="招商银行,43.50,43.00,43.80,44.00,..."</span>
+
+<span class="cm"># 解析步骤：</span>
+<span class="cm"># 1. 用正则提取引号内的 CSV 字符串</span>
+match = re.search(<span class="str">r'"([^"]*)"'</span>, text)
+
+<span class="cm"># 2. 按逗号分割得到字段数组</span>
+<span class="cm">#    索引0=名称, 1=今开, 2=昨收, 3=现价, ..., 8=成交量(手)</span>
+fields = match.group(<span class="num">1</span>).split(<span class="str">","</span>)
+
+<span class="cm"># 3. 提取关键字段</span>
+name = fields[<span class="num">0</span>]        <span class="cm"># 股票名称，如 "平安银行"</span>
+open_price = <span class="fn">float</span>(fields[<span class="num">1</span>])
+prev_close = <span class="fn">float</span>(fields[<span class="num">2</span>])   <span class="cm"># 昨日收盘价</span>
+current = <span class="fn">float</span>(fields[<span class="num">3</span>])      <span class="cm"># 当前价格</span>
+volume = <span class="fn">int</span>(fields[<span class="num">8</span>])        <span class="cm"># 成交量（手）</span>
+
+change = <span class="fn">round</span>(current - prev_close, <span class="num">3</span>)
+change_percent = <span class="str">f"{(change / prev_close * 100):.2f}%"</span></pre>
+
+            <h4>代码转新浪格式：</h4>
+            <pre><span class="kw">def</span> <span class="fn">_resolve_sina_code</span>(raw: <span class="ty">str</span>) -> <span class="ty">str</span>:
+    s = raw.strip().upper()
+    <span class="kw">if</span> s[<span class="num">0</span>] <span class="kw">in</span> (<span class="str">"0"</span>, <span class="str">"3"</span>):
+        <span class="kw">return</span> <span class="str">f"sz{s}"</span>    <span class="cm"># 深圳交易所: sz000001</span>
+    <span class="kw">if</span> s[<span class="num">0</span>] == <span class="str">"6"</span>:
+        <span class="kw">return</span> <span class="str">f"sh{s}"</span>    <span class="cm"># 上海交易所: sh600036</span>
+    <span class="kw">return</span> s</pre>
+
+            <div class="info-box">
+                <strong>为什么用新浪而不是 Finnhub？</strong>Finnhub 的A股数据需要带后缀（.SS/.SZ），且免费版覆盖不全。新浪财经 API 免费、无需 Key、数据实时，是 A 股数据的最佳免费选择。
+            </div>
+
+            <!-- S3-10 -->
+            <h3 id="s3-10">3.10 <span class="file-path">backend/services/candle_service.py</span> — K线多数据源</h3>
+            <p>和 stock_service 对应的 K 线版，<strong>自动识别 A 股/美股</strong>，选择不同数据源。</p>
+
+            <pre><span class="kw">async def</span> <span class="fn">get_candles</span>(symbol, period=<span class="str">"3mo"</span>, interval=<span class="str">"1d"</span>):
+    resolved = symbol.strip().upper()
+
+    <span class="kw">if</span> <span class="fn">_is_china_stock</span>(resolved):
+        <span class="kw">return await</span> <span class="fn">_get_a_share_candles</span>(resolved, period)   <span class="cm"># 新浪日线</span>
+
+    <span class="cm"># 美股: Twelve Data → yfinance 降级</span>
+    td_result = <span class="kw">await</span> <span class="fn">get_twelve_data_candles</span>(resolved, period, interval)
+    <span class="kw">if</span> td_result <span class="kw">is not None</span> <span class="kw">and</span> td_result.get(<span class="str">"candles"</span>):
+        <span class="kw">return</span> td_result
+
+    <span class="kw">return await</span> <span class="fn">_get_us_candles</span>(resolved, period, interval)   <span class="cm"># yfinance 兜底</span></pre>
+
+            <p>A 股 K 线同样走新浪财经，调用 <code>CN_MarketData.getKLineData</code> 接口，返回的是 JSON（不是 var 格式），直接解析即可。</p>
+
+            <!-- S3-11 -->
+            <h3 id="s3-11">3.11 <span class="file-path">backend/services/llm_service.py</span> — DeepSeek AI 分析核心</h3>
+            <p>这是整个项目<strong>最核心的文件</strong>。它负责：构造 Prompt、调用 DeepSeek、解析 JSON、多层容错。</p>
+
+            <h4>3.11.1 延迟初始化客户端：</h4>
+            <pre><span class="cm"># 为什么用延迟初始化而不是模块顶层创建？</span>
+<span class="cm"># 如果 DEEPSEEK_API_KEY 未设置，模块导入时不会报错，只有实际调用时才抛异常</span>
+<span class="cm"># 这让应用在没有配置 API Key 时也能启动（健康检查等接口仍可访问）</span>
+_client: AsyncOpenAI | <span class="kw">None</span> = <span class="kw">None</span>
+
+<span class="kw">def</span> <span class="fn">_get_client</span>() -> AsyncOpenAI:
+    <span class="kw">global</span> _client
+    <span class="kw">if</span> _client <span class="kw">is None</span>:
+        _client = <span class="fn">AsyncOpenAI</span>(
+            api_key=DEEPSEEK_API_KEY,
+            base_url=<span class="str">"https://api.deepseek.com"</span>,  <span class="cm"># OpenAI SDK 兼容 DeepSeek</span>
+        )
+    <span class="kw">return</span> _client</pre>
+
+            <h4>3.11.2 System Prompt 设计：</h4>
+            <pre>SYSTEM_PROMPT = <span class="str">'''你是一个专业的股票分析师。用户会提供股票的实时行情数据...
+
+请严格按以下 JSON 格式返回分析结果，不要包含任何其他文字、解释或 Markdown 标记：
+
+{
+  "summary": "用1-5句中文总结...",
+  "sentiment": "Bullish 或 Neutral 或 Bearish",
+  "risk_level": "Low Risk 或 Medium Risk 或 High Risk"
+}
+
+规则：
+- sentiment 只能是 Bullish、Neutral、Bearish 之一
+- risk_level 只能是 Low Risk、Medium Risk、High Risk 之一
+- 只返回 JSON 对象，不要用代码块包裹
+- 所有字段都必须有值，不能为空字符串'''</span></pre>
+
+            <div class="info-box">
+                <strong>Prompt 设计原则：</strong>(1) 明确格式约束——"只返回 JSON"；(2) 枚举值约束——写清楚可选值；(3) 负面约束——"不要有任何前缀或后缀文字"。这三层约束层层递进，从源头减少 LLM "乱说话"的可能。
+            </div>
+
+            <h4>3.11.3 K线技术指标摘要：</h4>
+            <p><code>_build_candle_summary()</code> 函数从原始 K 线数据（开/高/低/收/量数组）中计算出以下技术指标，拼成一段文字传给 LLM：</p>
+            <ul>
+                <li><strong>区间极值：</strong>period_high、period_low（最高/最低价）</li>
+                <li><strong>期间涨跌幅：</strong>(最新收盘 - 最早收盘) / 最早收盘</li>
+                <li><strong>价格分位：</strong>当前收盘在区间中的百分比位置</li>
+                <li><strong>移动均线：</strong>MA5、MA10、MA20 及与现价的关系</li>
+                <li><strong>成交量趋势：</strong>近5日 vs 前5日对比，判断放量/缩量/持平</li>
+            </ul>
+
+            <h4>3.11.4 API 调用配置（三重稳定性保障）：</h4>
+            <pre>response = <span class="kw">await</span> _get_client().chat.completions.create(
+    model=<span class="str">"deepseek-chat"</span>,
+    messages=[...],
+    temperature=<span class="num">0.3</span>,                              <span class="cm"># 低温度：输出更确定性，减少随机性</span>
+    response_format={<span class="str">"type"</span>: <span class="str">"json_object"</span>},    <span class="cm"># 模型层强制输出 JSON</span>
+)</pre>
+
+            <ul>
+                <li><strong>temperature=0.3：</strong>低温度让模型输出更"保守"、更可预测，减少随机插入闲聊文字的概率</li>
+                <li><strong>response_format={"type": "json_object"}：</strong>DeepSeek 在 API 层面就保证输出是合法 JSON，这是最有力的一层保障</li>
+                <li><strong>4 层容错（见下方）：</strong>即使 DeepSeek 违抗了以上所有约束，代码层面仍有兜底</li>
+            </ul>
+
+            <h4>3.11.5 4 层 JSON 解析容错机制：</h4>
+            <pre><span class="cm">// ===== Layer 1: 理想路径 — 直接 json.loads =====</span>
+<span class="kw">try</span>:
+    result = json.loads(content)            <span class="cm"># 纯 JSON → 一次成功</span>
+    <span class="kw">return</span> _validate_and_return(result)
+<span class="kw">except</span> json.JSONDecodeError:
+    <span class="cm">// ===== Layer 2: 正则暴力提取 =====</span>
+    match = re.search(<span class="str">r'\{.*\}'</span>, content, re.DOTALL)  <span class="cm"># "好的，分析如下：{...}" → 提取 {...}</span>
+    <span class="kw">if</span> match:
+        result = json.loads(match.group())
+        <span class="kw">return</span> _validate_and_return(result)
+
+    <span class="cm">// ===== Layer 3: 自动重试（最多2次）=====</span>
+    <span class="kw">if</span> retry &lt; <span class="num">2</span>:
+        <span class="kw">return await</span> analyze_stock(stock_data, retry + <span class="num">1</span>)  <span class="cm"># 递归重试</span>
+
+    <span class="cm">// ===== Layer 4: 最终降级 =====</span>
+    <span class="kw">return</span> {
+        <span class="str">"summary"</span>: <span class="str">"AI 分析暂时不可用"</span>,
+        <span class="str">"sentiment"</span>: <span class="str">"Neutral"</span>,
+        <span class="str">"risk_level"</span>: <span class="str">"Medium Risk"</span>,
+    }</pre>
+
+            <div class="warn-box">
+                <strong>设计理念：永远不要让前端崩溃。</strong>即使 LLM 完全乱说、网络超时、API 欠费，前端用户看到的永远是一个合法的分析结果卡片——最坏情况就是显示"AI 分析暂时不可用"，而不是白屏或报错。
+            </div>
+
+            <h4>3.11.6 字段验证函数：</h4>
+            <pre><span class="kw">def</span> <span class="fn">_validate_and_return</span>(data: <span class="ty">dict</span>) -> <span class="ty">dict</span>:
+    <span class="cm"># 如果 LLM 返回了不在枚举范围内的值，强制纠正为默认值</span>
+    <span class="kw">if</span> sentiment <span class="kw">not in</span> {<span class="str">"Bullish"</span>, <span class="str">"Neutral"</span>, <span class="str">"Bearish"</span>}:
+        sentiment = <span class="str">"Neutral"</span>
+    <span class="kw">if</span> risk <span class="kw">not in</span> {<span class="str">"Low Risk"</span>, <span class="str">"Medium Risk"</span>, <span class="str">"High Risk"</span>}:
+        risk = <span class="str">"Medium Risk"</span>
+    <span class="kw">return</span> {<span class="str">"summary"</span>: data.get(<span class="str">"summary"</span>, <span class="str">""</span>)[:<span class="num">200</span>],  <span class="cm"># 截断超长文本</span>
+            <span class="str">"sentiment"</span>: sentiment,
+            <span class="str">"risk_level"</span>: risk}</pre>
+
+            <!-- S3-12 -->
+            <h3 id="s3-12">3.12 <span class="file-path">backend/services/supabase_service.py</span> — 数据库存取</h3>
+            <p>封装了 Supabase 的两个操作：<strong>存储分析结果</strong>和<strong>查询历史记录</strong>。</p>
+
+            <pre><span class="cm"># 同样使用延迟初始化，避免 Supabase URL/Key 未设置时启动崩溃</span>
+_supabase: Client | <span class="kw">None</span> = <span class="kw">None</span>
+
+<span class="kw">def</span> <span class="fn">save_analysis</span>(data: <span class="ty">dict</span>) -> <span class="ty">dict</span> | <span class="kw">None</span>:
+    <span class="cm"># 向 analyses 表插入一行</span>
+    result = _get_client().table(<span class="str">"analyses"</span>).insert(data).execute()
+    <span class="kw">return</span> result.data[<span class="num">0</span>] <span class="kw">if</span> result.data <span class="kw">else None</span>
+
+<span class="kw">def</span> <span class="fn">get_recent_analyses</span>(limit=<span class="num">5</span>) -> <span class="ty">list</span>:
+    <span class="cm"># 按 created_at 降序排列，取最新 N 条</span>
+    result = (
+        _get_client().table(<span class="str">"analyses"</span>)
+        .select(<span class="str">"*"</span>)
+        .order(<span class="str">"created_at"</span>, desc=<span class="kw">True</span>)
+        .limit(limit)
+        .execute()
+    )
+    <span class="kw">return</span> result.data <span class="kw">if</span> result.data <span class="kw">else</span> []</pre>
+
+            <!-- S3-13 -->
+            <h3 id="s3-13">3.13 <span class="file-path">backend/services/cache.py</span> — TTL 缓存 &amp; 节流器</h3>
+            <p><strong>两个独立工具类</strong>，解决免费 API 的两个核心问题：频率限制和重复请求。</p>
+
+            <h4>TTLCache — 减少重复请求：</h4>
+            <pre><span class="kw">class</span> <span class="ty">TTLCache</span>:
+    <span class="cm">"""简单的内存 TTL 缓存。set(key, val) 存，get(key) 取。
+    超过 ttl_seconds 自动过期删除。默认 300 秒（5分钟）。"""</span>
+    <span class="kw">def</span> <span class="fn">get</span>(<span class="kw">self</span>, key):
+        <span class="cm"># 检查时间戳，过期则删除并返回 None</span>
+    <span class="kw">def</span> <span class="fn">set</span>(<span class="kw">self</span>, key, value):
+        <span class="cm"># 存储 (当前时间, 值) 元组</span></pre>
+
+            <div class="info-box">
+                <strong>用在哪？</strong>yfinance 的行情和 K 线结果都缓存了 5 分钟。相同股票代码在 5 分钟内重复查询直接走缓存，不发起网络请求。避免触发 Yahoo 的频率限制，也加快页面响应。
+            </div>
+
+            <h4>YFRateLimiter — 避免触发限流：</h4>
+            <pre><span class="kw">class</span> <span class="ty">YFRateLimiter</span>:
+    <span class="cm">"""全局节流器：确保两次 yfinance 调用间隔 ≥ 3 秒。
+    用 threading.Lock 保证线程安全（虽然 yfinance 是同步调用，但多个请求并发时仍可能竞态）。"""</span>
+    <span class="kw">def</span> <span class="fn">acquire</span>(<span class="kw">self</span>):
+        <span class="cm"># 计算距离上次调用过了多久，不够则 sleep</span></pre>
+
+            <div class="warn-box">
+                <strong>为什么 yfinance 用 threading.Lock 而 Twelve Data 用 asyncio.Lock？</strong>yfinance 是同步库，运行在 FastAPI 的线程池中（多个线程并发），所以需要线程锁。Twelve Data 通过 httpx 异步调用，运行在同一个事件循环中，所以用异步锁。
+            </div>
+        </div>
+
+        <!-- ====== S4: 前端 ====== -->
+        <div class="card" id="s4">
+            <h2>4. 前端源码逐文件分析</h2>
+
+            <h3 id="s4-1">4.1 <span class="file-path">frontend/index.html</span> — 页面结构</h3>
+            <p>纯 HTML5 页面，按<strong>功能区域</strong>分为几个卡片区块：</p>
+
+            <pre><span class="cm">&lt;!-- 1. 搜索框 --&gt;</span>
+&lt;input id=<span class="str">"stockInput"</span> placeholder=<span class="str">"输入股票代码，如 AAPL / 000001"</span>&gt;
+&lt;button id=<span class="str">"analyzeBtn"</span>&gt;分析&lt;/button&gt;
+
+<span class="cm">&lt;!-- 2. K线图容器（Lightweight Charts 渲染目标）--&gt;</span>
+&lt;div id=<span class="str">"chartContainer"</span>&gt;&lt;/div&gt;
+
+<span class="cm">&lt;!-- 3. 实时行情卡片 --&gt;</span>
+&lt;div id=<span class="str">"stockCard"</span>&gt;
+    &lt;span id=<span class="str">"stockSymbol"</span>&gt;&lt;/span&gt;  &lt;span id=<span class="str">"stockPrice"</span>&gt;&lt;/span&gt;
+    &lt;span id=<span class="str">"stockChange"</span>&gt;&lt;/span&gt; &lt;span id=<span class="str">"stockVolume"</span>&gt;&lt;/span&gt;
+&lt;/div&gt;
+
+<span class="cm">&lt;!-- 4. AI 分析卡片 --&gt;</span>
+&lt;div id=<span class="str">"analysisCard"</span>&gt;
+    &lt;span id=<span class="str">"sentimentTag"</span>&gt;&lt;/span&gt;  &lt;span id=<span class="str">"riskTag"</span>&gt;&lt;/span&gt;
+    &lt;p id=<span class="str">"aiSummary"</span>&gt;&lt;/p&gt;
+&lt;/div&gt;
+
+<span class="cm">&lt;!-- 5. 调试面板 (默认隐藏) --&gt;</span>
+&lt;div id=<span class="str">"debugCard"</span>&gt;...&lt;/div&gt;
+
+<span class="cm">&lt;!-- 6. 历史记录 --&gt;</span>
+&lt;div id=<span class="str">"historyList"</span>&gt;...&lt;/div&gt;</pre>
+
+            <p>所有卡片默认 <code>display:none</code>，数据加载成功后才显示，避免空白卡片。</p>
+
+            <h3 id="s4-2">4.2 <span class="file-path">frontend/style.css</span> — 深色主题 UI</h3>
+            <p>所有样式写在一个文件中，无第三方 CSS 框架依赖。关键设计：</p>
+            <ul>
+                <li><strong>颜色体系：</strong>深蓝黑底色(#1a1a2e) + 卡片(#16213e) + 蓝色强调(#4a7cff)</li>
+                <li><strong>中国股市红涨绿跌：</strong><code>.change-up { color: #f56565 }</code>（红色上涨）、<code>.change-down { color: #48bb78 }</code>（绿色下跌）</li>
+                <li><strong>情绪标签：</strong>Bullish 橙色、Neutral 灰色、Bearish 蓝色，带圆点前缀</li>
+                <li><strong>风险标签：</strong>Low 绿色、Medium 橙色、High 红色，同样带圆点</li>
+                <li><strong>卡片动画：</strong><code>@keyframes fadeIn</code> 淡入 + 上移，0.3s 过渡</li>
+                <li><strong>Loading 旋转器：</strong>纯 CSS border 动画，不依赖外部图标库</li>
+                <li><strong>响应式：</strong><code>@media (max-width: 480px)</code> 移动端适配</li>
+            </ul>
+
+            <h3 id="s4-3">4.3 <span class="file-path">frontend/app.js</span> — 前端核心逻辑</h3>
+            <p>所有前端 JS 在一个文件中，<strong>零框架依赖</strong>（除了外链的 Lightweight Charts CDN）。</p>
+
+            <h4>4.3.1 API 基地址自动检测：</h4>
+            <pre><span class="cm">// 自动判断运行环境：localhost → API 独立端口；Render → 同源</span>
+<span class="kw">const</span> hostname = window.location.hostname;
+<span class="kw">const</span> API_BASE = (hostname === <span class="str">'localhost'</span> || hostname === <span class="str">'127.0.0.1'</span> || hostname === <span class="str">''</span>)
+    ? <span class="str">'http://localhost:8000'</span>    <span class="cm">// 本地开发：FastAPI 默认端口 8000</span>
+    : window.location.origin;        <span class="cm">// Render 生产：前后端同源</span></pre>
+
+            <h4>4.3.2 核心分析流程（三阶段串行）：</h4>
+            <pre><span class="kw">async function</span> <span class="fn">analyzeStock</span>() {
+    <span class="cm">// 防重复点击：按钮 disabled 期间无法再次触发</span>
+    <span class="kw">if</span> (analyzeBtn.disabled) <span class="kw">return</span>;
+
+    <span class="fn">setLoading</span>(<span class="kw">true</span>);
+
+    <span class="cm">// Phase 1: 获取行情 → 渲染卡片</span>
+    <span class="kw">const</span> stockData = <span class="kw">await</span> <span class="fn">fetchStock</span>(symbol);
+    <span class="fn">renderStockCard</span>(stockData);
+
+    <span class="cm">// Phase 2: 获取K线 → 渲染图表（失败不阻塞主流程）</span>
+    <span class="kw">try</span> {
+        candleData = <span class="kw">await</span> <span class="fn">fetchCandles</span>(symbol);
+        <span class="fn">renderChart</span>(candleData);
+    } <span class="kw">catch</span> (err) {
+        chartCard.style.display = <span class="str">'none'</span>;  <span class="cm">// K线失败就隐藏图表区</span>
+    }
+
+    <span class="cm">// Phase 3: AI 分析（传入行情和K线）→ 渲染分析卡片</span>
+    <span class="kw">const</span> analysis = <span class="kw">await</span> <span class="fn">fetchAnalysis</span>(stockData, candleData);
+    <span class="fn">renderAnalysisCard</span>(analysis);
+
+    <span class="fn">setLoading</span>(<span class="kw">false</span>);
+}</pre>
+
+            <h4>4.3.3 K线图渲染（Lightweight Charts）：</h4>
+            <pre><span class="cm">// 每次渲染前先销毁旧图表实例，防止内存泄漏</span>
+<span class="kw">if</span> (chart) { chart.remove(); chart = <span class="kw">null</span>; candleSeries = <span class="kw">null</span>; }
+
+<span class="cm">// 先显示容器再初始化（否则 0×0 容器上图表无法渲染）</span>
+chartCard.style.display = <span class="str">'block'</span>;
+
+chart = LightweightCharts.<span class="fn">createChart</span>(chartContainer, {
+    layout: { background: { color: <span class="str">'#16213e'</span> }, textColor: <span class="str">'#888'</span> },
+    <span class="cm">// ... 网格线、十字光标、时间轴等配置</span>
+});
+
+candleSeries = chart.<span class="fn">addCandlestickSeries</span>({
+    upColor: <span class="str">'#f56565'</span>,    <span class="cm">// 阳线红色（A股习惯）</span>
+    downColor: <span class="str">'#48bb78'</span>,  <span class="cm">// 阴线绿色（A股习惯）</span>
+});
+candleSeries.<span class="fn">setData</span>(candles);
+chart.<span class="fn">timeScale</span>().<span class="fn">fitContent</span>();  <span class="cm">// 自适应缩放</span></pre>
+
+            <h4>4.3.4 Debug 面板：</h4>
+            <pre><span class="cm">// 每次 API 调用后都 push 一条 debug 记录</span>
+<span class="kw">function</span> <span class="fn">addDebugLog</span>(label, data, isError) {
+    debugLogs.push({ label, data, isError, time: <span class="kw">new</span> <span class="fn">Date</span>().<span class="fn">toLocaleTimeString</span>() });
+    <span class="fn">renderDebug</span>();
+}
+
+<span class="cm">// 用法：每次 fetch 后调用</span>
+<span class="fn">addDebugLog</span>(<span class="str">'股票行情 API (/api/stock)'</span>, stockData, <span class="kw">false</span>);
+<span class="fn">addDebugLog</span>(<span class="str">'K线数据 API (/api/candles)'</span>, candleData, <span class="kw">false</span>);
+<span class="fn">addDebugLog</span>(<span class="str">'AI 分析 API (/api/analyze)'</span>, analysis, <span class="kw">false</span>);</pre>
+
+            <div class="info-box">
+                <strong>Debug 面板设计思路：</strong>面试场景下，面试官需要看到"API 实际返回了什么"。Debug 面板将每次 API 调用的原始 JSON 都展示出来，配合浏览器 F12 Console 的详细日志，形成双重可观测性。
+            </div>
+
+            <h4>4.3.5 输入增强：</h4>
+            <pre><span class="cm">// 自动转大写（不影响数字和中文）</span>
+stockInput.<span class="fn">addEventListener</span>(<span class="str">'input'</span>, <span class="kw">function</span> () {
+    <span class="kw">const</span> cursor = <span class="kw">this</span>.selectionStart;
+    <span class="kw">const</span> oldVal = <span class="kw">this</span>.value;
+    <span class="kw">const</span> newVal = oldVal.<span class="fn">toUpperCase</span>();
+    <span class="kw">if</span> (newVal !== oldVal) {
+        <span class="kw">this</span>.value = newVal;
+        <span class="kw">this</span>.<span class="fn">setSelectionRange</span>(cursor, cursor);  <span class="cm"># 保持光标位置</span>
+    }
+});
+
+<span class="cm">// 回车直接触发分析</span>
+stockInput.<span class="fn">addEventListener</span>(<span class="str">'keydown'</span>, <span class="kw">function</span> (e) {
+    <span class="kw">if</span> (e.key === <span class="str">'Enter'</span>) <span class="fn">analyzeStock</span>();
+});</pre>
+        </div>
+
+        <!-- ====== S5: 部署 ====== -->
+        <div class="card" id="s5">
+            <h2>5. 部署配置 — <span class="file-path">render.yaml</span></h2>
+
+            <pre><span class="kw">services</span>:
+  - <span class="kw">type</span>: web               <span class="cm"># Web Service 类型</span>
+    <span class="kw">name</span>: stock-ai-dashboard
+    <span class="kw">env</span>: python
+    <span class="kw">plan</span>: free               <span class="cm"># 免费套餐（15分钟无请求自动休眠）</span>
+    <span class="kw">buildCommand</span>: pip install -r backend/requirements.txt
+    <span class="kw">startCommand</span>: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    <span class="kw">envVars</span>:
+      - <span class="kw">key</span>: TWELVE_DATA_API_KEY
+        <span class="kw">sync</span>: <span class="kw">false</span>         <span class="cm"># 不从代码同步，需在 Render 后台手动填写</span>
+      - <span class="kw">key</span>: DEEPSEEK_API_KEY
+        <span class="kw">sync</span>: <span class="kw">false</span>
+      <span class="cm"># ... 其余环境变量同理</span></pre>
+
+            <div class="info-box">
+                <strong>为什么 sync: false？</strong>API Key 是敏感信息，不能提交到 GitHub。Render 的 <code>sync: false</code> 标记表示这个环境变量的值需要在 Render 后台手动填入，不会被 <code>render.yaml</code> 覆盖。这样代码仓库是安全的，但部署时 Render 知道需要配置这个变量。
+            </div>
+
+            <h4>Python 依赖（requirements.txt）：</h4>
+            <pre>fastapi           <span class="cm"># Web 框架</span>
+uvicorn           <span class="cm"># ASGI 服务器</span>
+httpx             <span class="cm"># 异步 HTTP 客户端（调外部 API）</span>
+openai            <span class="cm"># OpenAI SDK（兼容 DeepSeek API）</span>
+supabase          <span class="cm"># Supabase 客户端</span>
+python-dotenv     <span class="cm"># 加载 .env 文件</span>
+yfinance          <span class="cm"># Yahoo Finance 数据</span></pre>
+        </div>
+
+        <!-- ====== S6: 设计模式 ====== -->
+        <div class="card" id="s6">
+            <h2>6. 核心设计模式总结</h2>
+
+            <table>
+                <tr><th>模式</th><td>具体体现</td></tr>
+                <tr><th>关注点分离</th>
+                    <td>routers（HTTP层）/ services（业务逻辑）/ models（数据结构）三层分离，每层只做一件事</td></tr>
+                <tr><th>降级策略</th>
+                    <td>美股数据三级降级（Twelve Data → yfinance → Finnhub）；LLM 解析四层容错；K线获取二级降级</td></tr>
+                <tr><th>延迟初始化</th>
+                    <td>DeepSeek 客户端和 Supabase 客户端在首次调用时才初始化，避免缺少环境变量时应用启动崩溃</td></tr>
+                <tr><th>字段级数据补齐</th>
+                    <td>成交量从 yfinance 单独获取，与价格数据源解耦，解决免费 API 字段不完整的问题</td></tr>
+                <tr><th>缓存 + 节流</th>
+                    <td>TTL 缓存（5分钟过期）减少重复请求；速率限制器避免触发 API 频率上限</td></tr>
+                <tr><th>优雅降级</th>
+                    <td>K线获取失败不影响主流程（隐藏图表区继续展示分析）；LLM 失败返回兜底 JSON</td></tr>
+                <tr><th>前后端一体部署</th>
+                    <td>FastAPI StaticFiles 托管前端，消除 CORS 问题，简化部署（一个 Render 服务即可）</td></tr>
+                <tr><th>双重可观测性</th>
+                    <td>前端 Debug 面板 + 浏览器 Console + 后端 print() 日志，三层日志覆盖全链路</td></tr>
+            </table>
+        </div>
+
+        <footer>
+            AI 股票分析面板 — 教学文档 &middot; 2026-05-21
+        </footer>
+    </div>
+</body>
+</html>

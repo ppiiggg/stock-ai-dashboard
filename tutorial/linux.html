@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linux 面试速通 — 教学文档</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: #1a1a2e; color: #e0e0e0; min-height: 100vh; padding: 40px 16px; line-height: 1.7;
+        }
+        .container { max-width: 1000px; margin: 0 auto; }
+
+        header {
+            text-align: center; margin-bottom: 40px; padding-bottom: 24px;
+            border-bottom: 2px solid #2a2a4a;
+        }
+        header h1 { font-size: 32px; font-weight: 700; color: #fff; letter-spacing: 2px; margin-bottom: 8px; }
+        header p { color: #888; font-size: 14px; }
+
+        .card {
+            background: #16213e; border-radius: 12px; padding: 28px; margin-bottom: 20px;
+        }
+        .card h2 {
+            font-size: 22px; color: #fff; margin-bottom: 20px;
+            padding-bottom: 10px; border-bottom: 1px solid #2a2a4a;
+        }
+        .card h3 {
+            font-size: 17px; color: #4a7cff; margin: 28px 0 10px;
+            padding-left: 10px; border-left: 3px solid #4a7cff;
+        }
+
+        p, li { color: #c0c0c0; font-size: 14px; line-height: 1.9; }
+        ul { padding-left: 20px; }
+        li { margin-bottom: 6px; }
+
+        pre {
+            background: #0d1117; border-radius: 8px; padding: 16px 20px; overflow-x: auto;
+            font-family: 'SF Mono', 'Cascadia Code', 'Consolas', 'Fira Code', monospace;
+            font-size: 13px; line-height: 1.7; color: #c9d1d9;
+            border: 1px solid #2a2a4a; margin: 12px 0;
+        }
+        .kw { color: #ff7b72; } .str { color: #a5d6ff; } .cm { color: #8b949e; }
+        .fn { color: #d2a8ff; } .num { color: #79c0ff; }
+
+        table {
+            width: 100%; border-collapse: collapse; margin: 12px 0;
+        }
+        th, td {
+            padding: 10px 14px; text-align: left; border-bottom: 1px solid #2a2a4a; font-size: 13px;
+        }
+        th { color: #888; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
+        td { color: #e0e0e0; }
+
+        .info-box {
+            background: rgba(74, 124, 255, 0.08);
+            border: 1px solid rgba(74, 124, 255, 0.25);
+            border-radius: 8px; padding: 14px 18px; margin: 14px 0;
+            font-size: 13px; color: #b0c4ff;
+        }
+        .warn-box {
+            background: rgba(245, 158, 11, 0.08);
+            border: 1px solid rgba(245, 158, 11, 0.25);
+            border-radius: 8px; padding: 14px 18px; margin: 14px 0;
+            font-size: 13px; color: #f0c060;
+        }
+
+        .cmd {
+            display: inline-block;
+            background: #0d1117; border: 1px solid #333; border-radius: 4px;
+            padding: 2px 8px; font-family: 'SF Mono', 'Consolas', monospace;
+            font-size: 12px; color: #a5d6ff; margin: 1px 2px;
+        }
+
+        .hot {
+            display: inline-block;
+            background: rgba(245, 101, 101, 0.2);
+            color: #f56565;
+            padding: 1px 6px; border-radius: 3px;
+            font-size: 11px; font-weight: 700; margin-left: 4px;
+        }
+
+        footer {
+            text-align: center; padding: 30px; color: #666; font-size: 12px;
+        }
+
+        @media (max-width: 640px) {
+            header h1 { font-size: 22px; }
+            pre { font-size: 11px; padding: 12px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+
+        <header>
+            <h1>Linux 面试速通</h1>
+            <p>高频命令 + 核心概念 &middot; 2026-05-21</p>
+        </header>
+
+        <!-- ====== 文件操作 ====== -->
+        <div class="card">
+            <h2>1. 文件与目录操作 <span class="hot">必考</span></h2>
+
+            <table>
+                <tr><th style="width:200px">命令</th><td>说明</td></tr>
+                <tr><th><span class="cmd">ls -la</span></th><td>列出当前目录所有文件（含隐藏文件）+ 详细权限</td></tr>
+                <tr><th><span class="cmd">cd /path</span></th><td>切换目录</td></tr>
+                <tr><th><span class="cmd">pwd</span></th><td>打印当前所在目录的完整路径</td></tr>
+                <tr><th><span class="cmd">mkdir -p a/b/c</span></th><td>递归创建多级目录（-p 表示父目录不存在则自动创建）</td></tr>
+                <tr><th><span class="cmd">cp -r src dst</span></th><td>复制文件或目录（-r 递归复制整个文件夹）</td></tr>
+                <tr><th><span class="cmd">mv old new</span></th><td>移动 / 重命名文件</td></tr>
+                <tr><th><span class="cmd">rm -rf path</span></th><td>强制递归删除（危险操作，面试说知道但谨慎使用）</td></tr>
+                <tr><th><span class="cmd">touch file.txt</span></th><td>创建空文件 / 更新文件时间戳</td></tr>
+                <tr><th><span class="cmd">cat file.txt</span></th><td>查看文件全部内容（小文件）</td></tr>
+                <tr><th><span class="cmd">less file.txt</span></th><td>分页查看文件（大文件，q 退出，/ 搜索）</td></tr>
+                <tr><th><span class="cmd">head -n 20 / tail -n 20</span></th><td>查看文件头 / 尾 20 行</td></tr>
+                <tr><th><span class="cmd">tail -f log.txt</span></th><td>实时追踪日志文件新增内容（调试必备）</td></tr>
+                <tr><th><span class="cmd">find . -name "*.py"</span></th><td>在当前目录递归查找所有 .py 文件</td></tr>
+                <tr><th><span class="cmd">ln -s target link</span></th><td>创建软链接（类似 Windows 快捷方式）</td></tr>
+            </table>
+
+            <div class="info-box">
+                <strong>面试常问：</strong><span class="cmd">rm -rf /</span> 是什么？→ 强制递归删除根目录下所有文件，系统直接崩溃。千万不要执行。
+            </div>
+        </div>
+
+        <!-- ====== 权限 ====== -->
+        <div class="card">
+            <h2>2. 文件权限 <span class="hot">必考</span></h2>
+
+            <h3>权限表示法</h3>
+            <pre><span class="cm"># ls -la 输出示例</span>
+-rwxr-xr--  <span class="num">1</span> user group <span class="num">4096</span> May <span class="num">21</span> <span class="num">10:00</span> script.sh
+<span class="str">└┬┘└┬┘└┬┘</span>
+<span class="str"> │  │  └── 其他人的权限 (r-- = 只读)</span>
+<span class="str"> │  └───── 所属组的权限 (r-x = 读+执行)</span>
+<span class="str"> └──────── 文件拥有者的权限 (rwx = 读+写+执行)</span></pre>
+
+            <table>
+                <tr><th style="width:120px">符号</th><td>含义</td></tr>
+                <tr><th><span class="cmd">r</span></th><td>读 (read) = 4</td></tr>
+                <tr><th><span class="cmd">w</span></th><td>写 (write) = 2</td></tr>
+                <tr><th><span class="cmd">x</span></th><td>执行 (execute) = 1</td></tr>
+                <tr><th><span class="cmd">-</span></th><td>无权限 = 0</td></tr>
+            </table>
+
+            <h3>权限计算（数字相加）</h3>
+            <pre><span class="cm"># rwx = 4+2+1 = 7 （完全控制）</span>
+<span class="cm"># rw- = 4+2+0 = 6 （读写）</span>
+<span class="cm"># r-x = 4+0+1 = 5 （读+执行）</span>
+<span class="cm"># r-- = 4+0+0 = 4 （只读）</span>
+
+<span class="cm"># 最常用的组合：</span>
+chmod <span class="num">755</span> script.sh   <span class="cm"># 自己全权限，别人只能读+执行</span>
+chmod <span class="num">644</span> file.txt    <span class="cm"># 自己可读写，别人只读</span>
+chmod <span class="num">600</span> secret.key  <span class="cm"># 只有自己能读写（私钥文件）</span>
+chmod +x script.sh       <span class="cm"># 给所有用户添加执行权限</span></pre>
+
+            <table>
+                <tr><th style="width:120px">命令</th><td>说明</td></tr>
+                <tr><th><span class="cmd">chmod 755 file</span></th><td>修改文件权限</td></tr>
+                <tr><th><span class="cmd">chown user:group file</span></th><td>修改文件拥有者和所在组</td></tr>
+                <tr><th><span class="cmd">sudo</span></th><td>以超级管理员身份执行命令</td></tr>
+            </table>
+
+            <div class="info-box">
+                <strong>面试记忆口诀：</strong>读4写2执行1，三个数字分别代表：拥有者、组、其他人。755 = 自己全权限，别人只能读和跑。
+            </div>
+        </div>
+
+        <!-- ====== 文本处理 ====== -->
+        <div class="card">
+            <h2>3. 文本处理三剑客 <span class="hot">高频</span></h2>
+
+            <h3>grep — 文本搜索</h3>
+            <pre>grep <span class="str">"error"</span> app.log           <span class="cm"># 在文件中搜索包含 "error" 的行</span>
+grep -i <span class="str">"error"</span> app.log          <span class="cm"># 忽略大小写</span>
+grep -r <span class="str">"TODO"</span> ./src             <span class="cm"># 递归搜索目录下所有文件</span>
+grep -v <span class="str">"debug"</span> app.log         <span class="cm"># 排除包含 "debug" 的行（反向匹配）</span>
+grep -c <span class="str">"error"</span> app.log         <span class="cm"># 只统计匹配行数</span>
+ps aux | grep nginx                <span class="cm"># 管道组合：从进程列表中过滤 nginx</span></pre>
+
+            <h3>sed — 流编辑器（批量替换）</h3>
+            <pre>sed <span class="str">'s/old/new/'</span> file.txt        <span class="cm"># 每行第一个 old 替换为 new（只输出不改文件）</span>
+sed <span class="str">'s/old/new/g'</span> file.txt       <span class="cm"># 全局替换（一行中所有 old 都替换）</span>
+sed -i <span class="str">'s/old/new/g'</span> file.txt    <span class="cm"># -i 直接修改文件内容（危险，先备份）</span>
+sed -n <span class="str">'5,10p'</span> file.txt          <span class="cm"># 只打印第5到第10行</span>
+sed <span class="str">'/^$/d'</span> file.txt             <span class="cm"># 删除空行</span></pre>
+
+            <h3>awk — 列处理</h3>
+            <pre>awk <span class="str">'{print $1, $3}'</span> data.txt   <span class="cm"># 打印第1列和第3列（默认空格分隔）</span>
+awk -F<span class="str">','</span> <span class="str">'{print $2}'</span> data.csv   <span class="cm"># -F 指定分隔符为逗号，打印第2列</span>
+awk <span class="str">'$3 > 100 {print $0}'</span> file   <span class="cm"># 第3列值大于100才打印整行</span>
+awk <span class="str">'{sum+=$1} END {print sum}'</span> <span class="cm"># 对第1列求和</span></pre>
+
+            <div class="info-box">
+                <strong>面试场景：</strong>"日志文件 10GB，找出包含 500 错误码的行" → <span class="cmd">grep "500" access.log</span><br>
+                "提取 CSV 第3列并去重排序" → <span class="cmd">awk -F',' '{print $3}' data.csv | sort | uniq</span>
+            </div>
+        </div>
+
+        <!-- ====== 管道与重定向 ====== -->
+        <div class="card">
+            <h2>4. 管道与重定向 <span class="hot">必考</span></h2>
+
+            <table>
+                <tr><th style="width:150px">符号</th><td>含义</td></tr>
+                <tr><th><span class="cmd">cmd > file</span></th><td>标准输出重定向到文件（覆盖）</td></tr>
+                <tr><th><span class="cmd">cmd >> file</span></th><td>标准输出追加到文件（不覆盖）</td></tr>
+                <tr><th><span class="cmd">cmd 2> file</span></th><td>标准错误重定向到文件</td></tr>
+                <tr><th><span class="cmd">cmd 2>&1</span></th><td>标准错误合并到标准输出（一起处理）</td></tr>
+                <tr><th><span class="cmd">cmd < file</span></th><td>从文件读取作为标准输入</td></tr>
+                <tr><th><span class="cmd">cmd1 | cmd2</span></th><td>管道：cmd1 的输出作为 cmd2 的输入</td></tr>
+                <tr><th><span class="cmd">/dev/null</span></th><td>"黑洞"设备，写入的数据被丢弃（静默输出）</td></tr>
+            </table>
+
+            <h3>实战组合：</h3>
+            <pre><span class="cm"># 把编译输出和错误都写入日志，终端不显示任何东西</span>
+npm install &gt; build.log <span class="num">2</span>&amp;<span class="num">1</span>
+
+<span class="cm"># 静默运行（丢弃所有输出）</span>
+some_command &gt; /dev/null <span class="num">2</span>&amp;<span class="num">1</span>
+
+<span class="cm"># 经典管道链：查找包含 "ERROR" 的日志行，取前10条</span>
+cat app.log | grep <span class="str">"ERROR"</span> | head -n <span class="num">10</span>
+
+<span class="cm"># 统计某关键词出现次数</span>
+grep -o <span class="str">"ERROR"</span> app.log | wc -l</pre>
+
+            <div class="info-box">
+                <strong>标准输入/输出/错误编号：</strong>stdin=0, stdout=1, stderr=2。<span class="cmd">2>&1</span> 就是把 stderr(2) 重定向到 stdout(1) 当前指向的位置。
+            </div>
+        </div>
+
+        <!-- ====== 进程管理 ====== -->
+        <div class="card">
+            <h2>5. 进程管理 <span class="hot">高频</span></h2>
+
+            <table>
+                <tr><th style="width:180px">命令</th><td>说明</td></tr>
+                <tr><th><span class="cmd">ps aux</span></th><td>列出所有进程的详细信息</td></tr>
+                <tr><th><span class="cmd">ps aux | grep python</span></th><td>查找 Python 相关进程</td></tr>
+                <tr><th><span class="cmd">top / htop</span></th><td>实时进程监控（CPU、内存排序）</td></tr>
+                <tr><th><span class="cmd">kill PID</span></th><td>优雅终止进程（发 SIGTERM 信号）</td></tr>
+                <tr><th><span class="cmd">kill -9 PID</span></th><td>强制杀死进程（SIGKILL，不给清理机会）</td></tr>
+                <tr><th><span class="cmd">killall process_name</span></th><td>按名称杀死所有同名进程</td></tr>
+                <tr><th><span class="cmd">bg / fg</span></th><td>后台 / 前台运行</td></tr>
+                <tr><th><span class="cmd">jobs</span></th><td>查看当前终端的后台任务</td></tr>
+                <tr><th><span class="cmd">nohup cmd &</span></th><td>后台运行且不受终端关闭影响</td></tr>
+                <tr><th><span class="cmd">Ctrl+C / Ctrl+Z</span></th><td>终止前台进程 / 暂停并放入后台</td></tr>
+            </table>
+
+            <h3>ps aux 输出解读：</h3>
+            <pre><span class="cm">USER  PID  %CPU %MEM    VSZ   RSS  TTY  STAT  START  TIME  COMMAND</span>
+root  <span class="num">1234</span>  <span class="num">2.3</span>  <span class="num">1.5</span>  <span class="num">123456</span> <span class="num">45678</span> ?    S     <span class="num">10:00</span>  <span class="num">0:05</span>  nginx
+<span class="cm">#    │     │    │    │      │     │    │      │     │     │</span>
+<span class="cm">#    │     │    │    │      │     │    │      │     │     └─ 进程名</span>
+<span class="cm">#    │     │    │    │      │     │    │      │     └─ CPU累计时间</span>
+<span class="cm">#    │     │    │    │      │     │    │      └─ 启动时间</span>
+<span class="cm">#    │     │    │    │      │     │    └─ 状态(S=睡眠,R=运行,Z=僵尸)</span>
+<span class="cm">#    │     │    │    │      │     └─ 终端(远程进程通常显示 ?)</span>
+<span class="cm">#    │     │    │    │      └─ RSS: 实际物理内存(KB)</span>
+<span class="cm">#    │     │    │    └─ VSZ: 虚拟内存(KB)</span>
+<span class="cm">#    │     │    └─ 内存占用百分比</span>
+<span class="cm">#    │     └─ CPU占用百分比</span>
+<span class="cm">#    └─ 进程ID</span></pre>
+
+            <div class="warn-box">
+                <strong>面试区别点：</strong>kill（默认 -15/SIGTERM）让进程有机会清理资源后退出；kill -9（SIGKILL）直接暴力终止，进程无法做任何清理。优先用 kill，不行再用 kill -9。
+            </div>
+        </div>
+
+        <!-- ====== 磁盘与内存 ====== -->
+        <div class="card">
+            <h2>6. 磁盘、内存、网络</h2>
+
+            <table>
+                <tr><th style="width:180px">命令</th><td>说明</td></tr>
+                <tr><th><span class="cmd">df -h</span></th><td>查看磁盘分区使用情况（-h 人类可读：GB/MB）</td></tr>
+                <tr><th><span class="cmd">du -sh path/</span></th><td>查看目录占用空间大小</td></tr>
+                <tr><th><span class="cmd">free -h</span></th><td>查看内存使用情况</td></tr>
+                <tr><th><span class="cmd">ping host</span></th><td>测试网络连通性</td></tr>
+                <tr><th><span class="cmd">curl url</span></th><td>发起 HTTP 请求（测试 API 必备）</td></tr>
+                <tr><th><span class="cmd">wget url</span></th><td>下载文件</td></tr>
+                <tr><th><span class="cmd">netstat -tlnp</span></th><td>查看正在监听的端口</td></tr>
+                <tr><th><span class="cmd">lsof -i :8000</span></th><td>查看哪个进程占用 8000 端口</td></tr>
+                <tr><th><span class="cmd">scp file user@host:/path</span></th><td>远程拷贝文件（基于 SSH）</td></tr>
+                <tr><th><span class="cmd">rsync -avz src/ dst/</span></th><td>高效同步目录（增量传输）</td></tr>
+            </table>
+
+            <h3>实战场景：</h3>
+            <pre><span class="cm"># 服务器磁盘满了？快速找到大文件</span>
+du -sh /* <span class="num">2</span>&gt;/dev/null | sort -rh | head -n <span class="num">10</span>
+
+<span class="cm"># 测试 API 是否正常</span>
+curl -s <span class="str">"https://api.example.com/health"</span> | python -m json.tool
+
+<span class="cm"># 端口被占用？找到并杀死进程</span>
+lsof -i :<span class="num">8000</span>
+kill -9 <span class="num">12345</span></pre>
+        </div>
+
+        <!-- ====== vim ====== -->
+        <div class="card">
+            <h2>7. Vim 基础（服务器编辑文件必备）</h2>
+
+            <table>
+                <tr><th style="width:120px">操作</th><td>说明</td></tr>
+                <tr><th><span class="cmd">vim file</span></th><td>打开文件</td></tr>
+                <tr><th><span class="cmd">i</span></th><td>进入编辑模式（Insert）</td></tr>
+                <tr><th><span class="cmd">Esc</span></th><td>退出编辑模式，回到命令模式</td></tr>
+                <tr><th><span class="cmd">:w</span></th><td>保存文件</td></tr>
+                <tr><th><span class="cmd">:q</span></th><td>退出</td></tr>
+                <tr><th><span class="cmd">:wq</span></th><td>保存并退出</td></tr>
+                <tr><th><span class="cmd">:q!</span></th><td>不保存强制退出</td></tr>
+                <tr><th><span class="cmd">dd</span></th><td>删除光标所在行</td></tr>
+                <tr><th><span class="cmd">/keyword</span></th><td>搜索关键词（n 下一个，N 上一个）</td></tr>
+                <tr><th><span class="cmd">G / gg</span></th><td>跳到文件末尾 / 开头</td></tr>
+                <tr><th><span class="cmd">u</span></th><td>撤销</td></tr>
+                <tr><th><span class="cmd">Ctrl+r</span></th><td>重做</td></tr>
+            </table>
+
+            <div class="info-box">
+                <strong>面试求生：</strong>只需要记住 i → 编辑 → Esc → :wq 就够了。服务器上没有图形界面，不会 vim 基本寸步难行。
+            </div>
+        </div>
+
+        <!-- ====== 面试高频概念 ====== -->
+        <div class="card">
+            <h2>8. 面试高频概念题</h2>
+
+            <h3>8.1 软链接 vs 硬链接</h3>
+            <table>
+                <tr><th>软链接 (ln -s)</th><td>类似快捷方式，存的是路径字符串。源文件删除后软链接失效。</td></tr>
+                <tr><th>硬链接 (ln)</th><td>指向同一个 inode（文件数据块）。源文件"删除"后数据仍存在，直到所有硬链接都删除。</td></tr>
+            </table>
+
+            <h3>8.2 环境变量</h3>
+            <pre><span class="cm"># 临时设置（当前终端有效）</span>
+<span class="kw">export</span> MY_VAR=<span class="str">"hello"</span>
+
+<span class="cm"># 永久设置：写入 ~/.bashrc 或 ~/.zshrc</span>
+<span class="kw">echo</span> <span class="str">'export MY_VAR="hello"'</span> &gt;&gt; ~/.bashrc
+
+<span class="cm"># 查看所有环境变量</span>
+<span class="kw">env</span>
+<span class="kw">echo</span> <span class="str">$PATH</span>      <span class="cm"># 查看 PATH（可执行文件搜索路径）</span></pre>
+
+            <h3>8.3 文件描述符（面试加分项）</h3>
+            <p>Linux 一切皆文件。每个进程启动时默认打开三个文件描述符：</p>
+            <table>
+                <tr><th style="width:100px">0 = stdin</th><td>标准输入（键盘）</td></tr>
+                <tr><th>1 = stdout</th><td>标准输出（屏幕）</td></tr>
+                <tr><th>2 = stderr</th><td>标准错误（屏幕）</td></tr>
+            </table>
+
+            <h3>8.4 常见信号</h3>
+            <table>
+                <tr><th style="width:120px">信号</th><td>含义</td></tr>
+                <tr><th>SIGTERM (15)</th><td>请求进程终止（可被捕获，用于优雅关闭）</td></tr>
+                <tr><th>SIGKILL (9)</th><td>强制杀死（不可被捕获或忽略）</td></tr>
+                <tr><th>SIGINT (2)</th><td>中断信号（Ctrl+C 发送的信号）</td></tr>
+                <tr><th>SIGHUP (1)</th><td>终端挂断（常用于让守护进程重载配置）</td></tr>
+            </table>
+        </div>
+
+        <!-- ====== 一页纸速查 ====== -->
+        <div class="card">
+            <h2>9. 一页纸速查表（面试前 10 分钟过一遍）</h2>
+
+            <pre><span class="cm"># ── 文件 ──</span>
+ls -la          <span class="cm"># 列出文件</span>
+cd /path        <span class="cm"># 切换目录</span>
+pwd             <span class="cm"># 当前路径</span>
+cp -r a b       <span class="cm"># 复制</span>
+mv a b          <span class="cm"># 移动/重命名</span>
+rm -rf path     <span class="cm"># 删除</span>
+find . -name <span class="str">"*.py"</span>
+cat / less / head / tail
+
+<span class="cm"># ── 权限 ──</span>
+chmod <span class="num">755</span> file   <span class="cm"># r=4 w=2 x=1 → 751=rwx-rx--x</span>
+chown user file
+
+<span class="cm"># ── 文本 ──</span>
+grep -r <span class="str">"xxx"</span> ./
+sed <span class="str">'s/old/new/g'</span>
+awk <span class="str">'{print $1}'</span>
+
+<span class="cm"># ── 管道重定向 ──</span>
+cmd1 | cmd2     <span class="cm"># 管道</span>
+cmd &gt; file      <span class="cm"># 覆盖写入</span>
+cmd &gt;&gt; file     <span class="cm"># 追加写入</span>
+cmd <span class="num">2</span>&gt;&amp;<span class="num">1</span>        <span class="cm"># stderr→stdout</span>
+
+<span class="cm"># ── 进程 ──</span>
+ps aux | grep xxx
+kill -9 PID
+top / htop
+
+<span class="cm"># ── 磁盘网络 ──</span>
+df -h           <span class="cm"># 磁盘</span>
+free -h         <span class="cm"># 内存</span>
+curl url        <span class="cm"># HTTP</span>
+netstat -tlnp   <span class="cm"># 端口</span>
+lsof -i :<span class="num">8000</span>   <span class="cm"># 谁占端口</span></pre>
+        </div>
+
+        <footer>
+            Linux 面试速通 &middot; 2026-05-21
+        </footer>
+    </div>
+</body>
+</html>

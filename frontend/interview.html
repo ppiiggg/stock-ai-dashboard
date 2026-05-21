@@ -413,11 +413,12 @@
 
                 <div class="debug-step"><strong>1. 定位：</strong>Twelve Data 免费 API 层级 (Free Tier) 的 /quote 接口不返回成交量数据，返回的 volume 字段为 0。由于 Twelve Data 是美股首选数据源（三级降级的第一级），一旦它成功返回价格数据，代码就直接 return，不再走 yfinance/Finnhub 路径。</div>
                 <div class="debug-step"><strong>2. 排查：</strong>检查 stock_service.py 的 get_stock_quote() 流程——Twelve Data 成功后立即返回，而成交量补齐函数 _get_us_volume() 只在 _get_finnhub_quote() 和 _get_us_quote_from_yf() 内部调用，Twelve Data 路径上遗漏了成交量 enrichment。</div>
-                <div class="debug-step"><strong>3. 修复：</strong>在 stock_service.py 中，当 Twelve Data 成功返回但 volume 为 0 时，额外调用 _get_us_volume() 通过 yfinance 补齐成交量数据。同时为 Finnhub 降级路径也添加同样的 volume 补齐逻辑。</div>
-                <div class="debug-step"><strong>4. 验证：</strong>查询 AAPL → 成交量正确显示为几千万手；查询 TSLA → 成交量正常。成交量取自 yfinance，价格取自 Twelve Data，两个数据源互补、互不干扰。</div>
+                <div class="debug-step"><strong>3. 修复：</strong>分两步——（a）字段补齐：在 stock_service.py 的 Twelve Data 成功返回路径上，额外调用 _get_us_volume() 通过 yfinance 补齐成交量数据；（b）节流保护：因为 yfinance 没有官方 API 定额，连续高频调用会触发 Yahoo 风控封 IP。在 _get_us_volume() 中通过 YFRateLimiter 强制每次调用间隔 ≥ 3 秒，确保请求频率像"正常用户浏览"，不会触发反爬机制。YFRateLimiter 使用 threading.Lock + time.sleep 而非 asyncio.Lock，因为 yfinance 是同步库，调用它的 _get_us_volume() 本身是普通 def 函数（非 async），运行在线程池中。</div>
+                <div class="debug-step"><strong>4. 节流器设计对比：</strong>项目里有两套限速器，区别在于 Twelve Data 是明码标价的"60秒内最多8次"（滑动窗口计数），yfinance 是黑盒风控"别太密就行"（最小间隔法）。前者用 AsyncRateLimiter（asyncio.Lock + await asyncio.sleep），后者用 YFRateLimiter（threading.Lock + time.sleep），选型取决于调用方是 async 协程还是同步线程。</div>
+                <div class="debug-step"><strong>5. 验证：</strong>查询 AAPL → 成交量正确显示为数千万手；连续快速查询 TSLA 和 MSFT → 第二次查询自动等待约 3 秒后发起，不会被 Yahoo 封 IP。成交量取自 yfinance，价格取自 Twelve Data，两个数据源互补、限速机制隔离、互不干扰。</div>
 
                 <div class="highlight-box">
-                    <strong>经验教训：</strong>免费 API 各有限制——Twelve Data 免费版不提供成交量、Finnhub 免费版延迟 15 分钟。采用"多级数据源 + 字段级补齐"策略：价格优先取 Twelve Data，成交量永远从 yfinance 补，K 线图从 Twelve Data/yfinance/新浪分别获取。不要在单个免费 API 上依赖所有字段。
+                    <strong>经验教训：</strong>免费 API 各有限制——Twelve Data 免费版不提供成交量、yfinance 有隐式风控但不公开限额。修复方案有两层：（1）字段级补齐——价格优先取 Twelve Data，成交量永远从 yfinance 补；（2）节流隔离——为 yfinance 单独设计 YFRateLimiter，与 Twelve Data 的 AsyncRateLimiter 各自独立工作。两套限速器的锁类型（asyncio.Lock vs threading.Lock）取决于被调用库（异步 httpx vs 同步 yfinance）的性质，不能混用。
                 </div>
             </div>
         </div>

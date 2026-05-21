@@ -396,15 +396,16 @@
 
             <!-- Bug 3 -->
             <div class="debug-item">
-                <h3>Bug 3: CORS 跨域问题</h3>
-                <p style="font-size:13px;color:#f56565;margin-bottom:12px;"><strong>现象：</strong>本地开发时，前端 (file:// 协议打开 index.html) 请求 http://localhost:8000/api/stock/AAPL，浏览器报 CORS 错误。</p>
+                <h3>Bug 3: 美股成交量始终显示为 0</h3>
+                <p style="font-size:13px;color:#f56565;margin-bottom:12px;"><strong>现象：</strong>查询美股（如 AAPL、TSLA）时，行情卡片中成交量始终显示 "Volume: 0"，但股价、涨跌幅等其他数据正常。</p>
 
-                <div class="debug-step"><strong>1. 定位：</strong>浏览器同源策略阻止 file:// 协议向 localhost 发请求。FastAPI 后端未配置 CORS 中间件。</div>
-                <div class="debug-step"><strong>2. 修复：</strong>在 main.py 添加 CORSMiddleware，allow_origins=["*"]（开发阶段全放通）。部署到 Render 后，前后端同源（StaticFiles 托管），不再需要 CORS。</div>
-                <div class="debug-step"><strong>3. 验证：</strong>本地 file:// 打开可正常请求 localhost API。Render 部署后同源访问，CORS 中间件作为安全兜底。</div>
+                <div class="debug-step"><strong>1. 定位：</strong>Twelve Data 免费 API 层级 (Free Tier) 的 /quote 接口不返回成交量数据，返回的 volume 字段为 0。由于 Twelve Data 是美股首选数据源（三级降级的第一级），一旦它成功返回价格数据，代码就直接 return，不再走 yfinance/Finnhub 路径。</div>
+                <div class="debug-step"><strong>2. 排查：</strong>检查 stock_service.py 的 get_stock_quote() 流程——Twelve Data 成功后立即返回，而成交量补齐函数 _get_us_volume() 只在 _get_finnhub_quote() 和 _get_us_quote_from_yf() 内部调用，Twelve Data 路径上遗漏了成交量 enrichment。</div>
+                <div class="debug-step"><strong>3. 修复：</strong>在 stock_service.py 中，当 Twelve Data 成功返回但 volume 为 0 时，额外调用 _get_us_volume() 通过 yfinance 补齐成交量数据。同时为 Finnhub 降级路径也添加同样的 volume 补齐逻辑。</div>
+                <div class="debug-step"><strong>4. 验证：</strong>查询 AAPL → 成交量正确显示为几千万手；查询 TSLA → 成交量正常。成交量取自 yfinance，价格取自 Twelve Data，两个数据源互补、互不干扰。</div>
 
                 <div class="highlight-box">
-                    <strong>经验教训：</strong>开发阶段前端用 file:// 协议时需 CORS；生产环境前后端同源部署可消除 CORS 需求。FastAPI 一行 app.add_middleware(CORSMiddleware, ...) 即可解决。
+                    <strong>经验教训：</strong>免费 API 各有限制——Twelve Data 免费版不提供成交量、Finnhub 免费版延迟 15 分钟。采用"多级数据源 + 字段级补齐"策略：价格优先取 Twelve Data，成交量永远从 yfinance 补，K 线图从 Twelve Data/yfinance/新浪分别获取。不要在单个免费 API 上依赖所有字段。
                 </div>
             </div>
         </div>

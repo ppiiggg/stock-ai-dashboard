@@ -160,6 +160,14 @@
             line-height: 1.7;
         }
 
+        .debug-screenshot {
+            display: block;
+            max-width: 100%;
+            border-radius: 8px;
+            border: 1px solid #333;
+            margin: 12px 0;
+        }
+
         /* Architecture flow */
         .flow {
             display: flex;
@@ -384,6 +392,8 @@
                 <h3>Bug 2: 中国股票代码（6位数字如 000001）无法查询</h3>
                 <p style="font-size:13px;color:#f56565;margin-bottom:12px;"><strong>现象：</strong>输入 000001（平安银行），后端返回 404："Cannot get quote for 000001, check the ticker"。</p>
 
+                <img class="debug-screenshot" src="debug-china-stock.jpg" alt="Bug截图：英文代码正常，中文A股代码无法查询" loading="lazy" />
+
                 <div class="debug-step"><strong>1. 定位：</strong>Finnhub API 要求中国股票带交易所后缀（上证 .SS、深证 .SZ），当前代码仅做 .upper() 转换，未追加后缀。</div>
                 <div class="debug-step"><strong>2. 排查：</strong>确认 6 位纯数字代码被原样发送给 Finnhub → 000001 无法匹配任何标的。中国有两个交易所：深圳（0/3开头）、上海（6开头）。</div>
                 <div class="debug-step"><strong>3. 修复：</strong>新增 china_stock_service.py，调用新浪财经 API (hq.sinajs.cn) 获取A股实时行情；新增 is_china_stock() 函数自动识别6位数字代码，分流到A股数据源。</div>
@@ -397,7 +407,9 @@
             <!-- Bug 3 -->
             <div class="debug-item">
                 <h3>Bug 3: 美股成交量始终显示为 0</h3>
-                <p style="font-size:13px;color:#f56565;margin-bottom:12px;"><strong>现象：</strong>查询美股（如 AAPL、TSLA）时，行情卡片中成交量始终显示 "Volume: 0"，但股价、涨跌幅等其他数据正常。</p>
+                <p style="font-size:13px;color:#f56565;margin-bottom:12px;"><strong>现象：</strong>查询美股（如 AMZN）时，行情卡片中成交量始终显示 "Volume: 0" 或直接报错无法获取数据，但股价、涨跌幅等其他数据正常。</p>
+
+                <img class="debug-screenshot" src="debug-foreign-volume.jpg" alt="Bug截图：美股成交量显示为0，无法获取亚马逊数据" loading="lazy" />
 
                 <div class="debug-step"><strong>1. 定位：</strong>Twelve Data 免费 API 层级 (Free Tier) 的 /quote 接口不返回成交量数据，返回的 volume 字段为 0。由于 Twelve Data 是美股首选数据源（三级降级的第一级），一旦它成功返回价格数据，代码就直接 return，不再走 yfinance/Finnhub 路径。</div>
                 <div class="debug-step"><strong>2. 排查：</strong>检查 stock_service.py 的 get_stock_quote() 流程——Twelve Data 成功后立即返回，而成交量补齐函数 _get_us_volume() 只在 _get_finnhub_quote() 和 _get_us_quote_from_yf() 内部调用，Twelve Data 路径上遗漏了成交量 enrichment。</div>

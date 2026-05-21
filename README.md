@@ -1,7 +1,11 @@
 # AI 股票分析面板 (Stock AI Dashboard)
 
 ## 在线访问
-[填写你的 Render URL]
+
+| 用途 | URL |
+|------|-----|
+| 主应用 | https://stock-ai-dashboard-c3vm.onrender.com/ |
+| 面试交付文档（Prompt 代码 + Debug 记录 + 技术栈） | https://stock-ai-dashboard-c3vm.onrender.com/interview.html |
 
 ## 技术栈
 
